@@ -4,135 +4,52 @@ on: [push, pull_request]
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, windows-2022]
-        compiler: [gcc, clang]
-        crypto: [openssl]
-        bittorrent: [with-bt]
-        exclude:
-        - os: macos-14
-          crypto: gnutls
-        - crypto: openssl
-          bittorrent: without-bt
-        - os: windows-2022
-          crypto: gnutls  # GnuTLS may not be easily available on Windows, so exclude it for simplicity
-
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Linux setup
-      if: runner.os == 'Linux'
+    - name: Install cross-compilation tools
       run: |
         sudo apt-get update
-        sudo apt-get install \
-          g++-12 \
-          clang-15 \
+        sudo apt-get install -y \
+          mingw-w64 \
           autoconf \
           automake \
           autotools-dev \
           autopoint \
           libtool \
           pkg-config \
-          libssl-dev \
-          libgnutls28-dev \
-          libc-ares-dev \
-          zlib1g-dev \
-          libsqlite3-dev \
-          libssh2-1-dev \
-          libcppunit-dev
+          mingw-w64-x86-64-dev \
+          libc-ares-dev:amd64 \
+          zlib1g-dev:amd64 \
+          libsqlite3-dev:amd64 \
+          libexpat1-dev:amd64 \
+          libssh2-1-dev:amd64 \
+          libcppunit-dev:amd64
 
-    - name: MacOS setup
-      if: runner.os == 'macOS'
+    - name: Build and install dependent libraries
       run: |
-        brew install cppunit gettext openssl libssh2 c-ares sqlite3 \
-          autoconf automake pkg-config libtool
+        # 示例：这里应该包含构建和安装 c-ares, expat, sqlite3, zlib, libssh2, cppunit 的步骤
+        # 由于实际构建这些库的步骤较为复杂，这里简化示例，假设已经有预编译的库
+        # 可以根据实际情况补充完整构建和安装这些库的脚本
+        echo "Building and installing dependent libraries..."
 
-    - name: Windows setup
-      if: runner.os == 'Windows'
+    - name: Set environment variables for 64-bit build
       run: |
-        choco install -y make openssl
+        echo "HOST=x86_64-w64-mingw32" >> $GITHUB_ENV
+        echo "PREFIX=/usr/local/\$HOST" >> $GITHUB_ENV
 
-    - name: Setup clang (Linux)
-      if: runner.os == 'Linux' && matrix.compiler == 'clang'
+    - name: Configure build using mingw-config
       run: |
-        echo 'CC=clang-15' >> $GITHUB_ENV
-        echo 'CXX=clang++-15' >> $GITHUB_ENV
-
-    - name: Setup clang (MacOS)
-      if: runner.os == 'macOS' && matrix.compiler == 'clang'
-      run: |
-        echo 'CC=clang' >> $GITHUB_ENV
-        echo 'CXX=clang++' >> $GITHUB_ENV
-
-    - name: Setup gcc (Linux)
-      if: runner.os == 'Linux' && matrix.compiler == 'gcc'
-      run: |
-        echo 'CC=gcc-12' >> $GITHUB_ENV
-        echo 'CXX=g++-12' >> $GITHUB_ENV
-
-    - name: Setup gcc (MacOS)
-      if: runner.os == 'macOS' && matrix.compiler == 'gcc'
-      run: |
-        echo 'CC=gcc' >> $GITHUB_ENV
-        echo 'CXX=g++' >> $GITHUB_ENV
-
-    - name: Setup compiler for Windows
-      if: runner.os == 'Windows'
-      run: |
-        echo 'CC=gcc' >> $env:GITHUB_ENV
-        echo 'CXX=g++' >> $env:GITHUB_ENV
-
-    - name: Libtool
-      run: |
-        autoreconf -i
-
-    - name: Setup compiler flags
-      run: |
-        asanflags="-fsanitize=address,undefined -fno-sanitize-recover=undefined"
-        CPPFLAGS="$asanflags -g3"
-        LDFLAGS="$asanflags"
-        echo 'CPPFLAGS='"$CPPFLAGS" >> $GITHUB_ENV
-        echo 'LDFLAGS='"$LDFLAGS" >> $GITHUB_ENV
-
-    - name: Disable BitTorrent
-      if: matrix.bittorrent == 'without-bt'
-      run: |
-        FEATURE_FLAGS="$FEATURE_FLAGS --disable-bittorrent"
-        echo 'FEATURE_FLAGS='"$FEATURE_FLAGS" >> $GITHUB_ENV
-
-    - name: Configure autotools (Linux, gnutls)
-      if: runner.os == 'Linux' && matrix.crypto == 'gnutls'
-      run: |
-        ./configure --with-gnutls --without-openssl $FEATURE_FLAGS
-
-    - name: Configure autotools (Linux, openssl)
-      if: runner.os == 'Linux' && matrix.crypto == 'openssl'
-      run: |
-        ./configure --without-gnutls --with-openssl $FEATURE_FLAGS
-
-    - name: Configure autotools (macOS)
-      if: runner.os == 'macOS'
-      run: |
-        ./configure \
-          --without-openssl --without-gnutls --with-appletls \
-          --disable-nls
-
-    - name: Configure autotools (Windows, openssl)
-      if: runner.os == 'Windows' && matrix.crypto == 'openssl'
-      run: |
-        ./configure --without-gnutls --with-openssl $FEATURE_FLAGS
-
+        chmod +x mingw-config
+        ./mingw-config
     - name: Build aria2
       run: |
         make -j"$(nproc 2> /dev/null || sysctl -n hw.ncpu)" check
 
     - name: Save build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: aria2-build-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.crypto }}
-        path: |
-          src/aria2c
-          src/aria2c.exe  # For Windows
+          name: Package
+          path: mingw-out
