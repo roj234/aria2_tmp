@@ -9,7 +9,24 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install cross-compilation tools
+
+    - name: Install basic tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget tar p7zip-full
+
+    - name: Install MSYS2
+      run: |
+        wget https://github.com/msys2/msys2-installer/releases/download/2023-07-18/msys2-base-x86_64-20230718.sfx.exe
+        7z x msys2-base-x86_64-20230718.sfx.exe -o./msys2
+        ./msys2/usr/bin/bash -lc "pacman -Syu --noconfirm"
+        ./msys2/usr/bin/bash -lc "pacman -Su --noconfirm"
+
+    - name: Install mingw-w64-x86_64-gmp
+      run: |
+        ./msys2/usr/bin/bash -lc "pacman -S --noconfirm mingw-w64-x86_64-gmp"
+
+    - name: Install other cross-compilation tools and libraries
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -27,16 +44,7 @@ jobs:
           libexpat1-dev:amd64 \
           libssh2-1-dev:amd64 \
           libcppunit-dev:amd64 \
-          libgmp-dev \
-          mingw-w64-x86_64-libgmp
-
-
-    - name: Build and install dependent libraries
-      run: |
-        # 示例：这里应该包含构建和安装 c-ares, expat, sqlite3, zlib, libssh2, cppunit 的步骤
-        # 由于实际构建这些库的步骤较为复杂，这里简化示例，假设已经有预编译的库
-        # 可以根据实际情况补充完整构建和安装这些库的脚本
-        echo "Building and installing dependent libraries..."
+          libgmp-dev
 
     - name: Set environment variables for 64-bit build
       run: |
