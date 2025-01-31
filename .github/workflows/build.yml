@@ -18,7 +18,8 @@ jobs:
     - name: Install MSYS2
       run: |
         wget https://github.com/msys2/msys2-installer/releases/download/2024-12-08/msys2-base-x86_64-20241208.tar.xz
-        tar -xf msys2-base-x86_64-20241208.tar.xz -C msys2
+        mkdir -p msys2
+        tar -xf msys2-base-x86_64-20241208.tar.xz -C ./msys2
         ./msys2/usr/bin/bash -lc "pacman -Syu --noconfirm"
         ./msys2/usr/bin/bash -lc "pacman -Su --noconfirm"
 
