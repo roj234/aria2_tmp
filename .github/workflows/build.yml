@@ -26,7 +26,10 @@ jobs:
           libsqlite3-dev:amd64 \
           libexpat1-dev:amd64 \
           libssh2-1-dev:amd64 \
-          libcppunit-dev:amd64
+          libcppunit-dev:amd64 \
+          libgmp-dev \
+          mingw-w64-x86-64-libgmp
+
 
     - name: Build and install dependent libraries
       run: |
