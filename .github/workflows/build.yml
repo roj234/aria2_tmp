@@ -14,6 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set PREFIX environment variable
+        run: |
+          test -z "$PREFIX" && PREFIX="$HOME/$HOST"
+          echo "PREFIX=$PREFIX" >> $GITHUB_ENV
+  
       - name: Install system dependencies
         run: |
           sudo apt-get update
