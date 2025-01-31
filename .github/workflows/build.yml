@@ -39,7 +39,10 @@ jobs:
       run: |
         echo "HOST=x86_64-w64-mingw32" >> $GITHUB_ENV
         echo "PREFIX=/usr/local/\$HOST" >> $GITHUB_ENV
-
+    - name: Generate configure script
+      run: |
+        autoreconf -i
+    
     - name: Configure build using mingw-config
       run: |
         chmod +x mingw-config
