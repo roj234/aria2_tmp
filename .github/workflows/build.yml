@@ -37,7 +37,7 @@ jobs:
           ./configure \
             --disable-shared \
             --enable-static \
-            --prefix=./$HOST \
+            --prefix=$HOME/$HOST \
             --host=$HOST \
             --disable-cxx \
             --enable-fat \
@@ -51,7 +51,7 @@ jobs:
           ./configure \
             --disable-shared \
             --enable-static \
-            --prefix=./$HOST \
+            --prefix=$HOME/$HOST \
             --host=$HOST \
             --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE`
           make -j$(nproc) install
@@ -63,7 +63,7 @@ jobs:
           ./configure \
             --disable-shared \
             --enable-static \
-            --prefix=./$HOST \
+            --prefix=$HOME/$HOST \
             --host=$HOST \
             --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE`
           make -j$(nproc) install
@@ -78,9 +78,9 @@ jobs:
           RANLIB=$HOST-ranlib \
           STRIP=$HOST-strip \
           ./configure \
-            --prefix=./$HOST \
-            --libdir=./$HOST/lib \
-            --includedir=./$HOST/include \
+            --prefix=$HOME/$HOST \
+            --libdir=$HOME/$HOST/lib \
+            --includedir=$HOME/$HOST/include \
             --static
           make -j$(nproc) install
 
@@ -92,7 +92,7 @@ jobs:
             --disable-shared \
             --enable-static \
             --without-random \
-            --prefix=./$HOST \
+            --prefix=$HOME/$HOST \
             --host=$HOST \
             --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` \
             LIBS="-lws2_32"
@@ -105,7 +105,7 @@ jobs:
           ./configure \
             --disable-shared \
             --enable-static \
-            --prefix=./$HOST \
+            --prefix=$HOME/$HOST \
             --host=$HOST \
             --build=`dpkg-architecture -qDEB_BUILD_GNU_TYPE` \
             LIBS="-lws2_32"
