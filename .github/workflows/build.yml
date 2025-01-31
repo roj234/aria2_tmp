@@ -28,7 +28,7 @@ jobs:
           libssh2-1-dev:amd64 \
           libcppunit-dev:amd64 \
           libgmp-dev \
-          mingw-w64-x86-64-libgmp
+          mingw-w64-x86_64-gmp
 
 
     - name: Build and install dependent libraries
